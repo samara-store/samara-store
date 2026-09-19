@@ -730,6 +730,9 @@ textarea { resize: vertical; min-height: 80px; }
     <nav class="main-nav" id="mainNav">
       <a href="index.html" data-i18n="nav_home">الرئيسية</a>
       <a href="shop.html" data-i18n="nav_shop">التشكيلات</a>
+      <a href="shop.html?cat=jewelry" data-i18n="nav_jewelry">مجوهرات</a>
+      <a href="shop.html?cat=leather" data-i18n="nav_leather">جلديات وساعات</a>
+      <a href="shop.html?cat=gift-boxes" data-i18n="nav_giftboxes">علب هدايا</a>
     </nav>
     <div class="header-actions">
       <button class="lang-btn" id="langBtn">EN</button>
@@ -754,9 +757,121 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 </footer>
 
-<script src="products.js"></script>
 <script>
-const PRODUCTS = window.SAMARA_PRODUCTS || [];
+const PRODUCTS = [
+  {
+    "id": "p01",
+    "category": "jewelry",
+    "gifting": true,
+    "stock": 24,
+    "name": { "ar": "خاتم فضة زوجي كلاسيك", "en": "Classic Silver Band Rings" },
+    "desc": { "ar": "خواتم فضة بتصميم بسيط ومصقول، مناسبة للاستخدام اليومي أو كهدية.", "en": "Polished silver bands with a minimal profile — everyday wear or a considered gift." },
+    "price": 650,
+    "compareAt": null,
+    "colors": ["#C7C9CC"],
+    "sizes": ["52", "54", "56", "58", "60"],
+    "image": "https://images.unsplash.com/photo-1578632297758-3a6c6de14be8?w=900&q=80&auto=format&fit=crop",
+    "tag": null
+  },
+  {
+    "id": "p02",
+    "category": "jewelry",
+    "gifting": true,
+    "stock": 4,
+    "name": { "ar": "خاتم فضة استيتمنت", "en": "Statement Silver Ring" },
+    "desc": { "ar": "خاتم فضة بتفاصيل لامعة وتصميم مميز يلفت الانتباه بدون مبالغة.", "en": "A brighter, more sculptural silver ring — a quiet statement piece without being loud." },
+    "price": 780,
+    "compareAt": null,
+    "colors": ["#D8D9DB"],
+    "sizes": ["52", "54", "56", "58", "60"],
+    "image": "https://images.unsplash.com/photo-1589426056403-25c5faaac8ea?w=900&q=80&auto=format&fit=crop",
+    "tag": { "ar": "جديد", "en": "New" }
+  },
+  {
+    "id": "p03",
+    "category": "jewelry",
+    "gifting": true,
+    "stock": 0,
+    "name": { "ar": "سلسلة فضة", "en": "Silver Chain Necklace" },
+    "desc": { "ar": "سلسلة فضة يونيسكس بتصميم بسيط، تتنسق مع أي إطلالة.", "en": "A unisex silver chain with a clean, minimal build that layers with anything." },
+    "price": 920,
+    "compareAt": 1050,
+    "colors": ["#C7C9CC"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1612011213611-ff46ab689475?w=900&q=80&auto=format&fit=crop",
+    "tag": { "ar": "خصم", "en": "Sale" }
+  },
+  {
+    "id": "p04",
+    "category": "leather",
+    "gifting": true,
+    "stock": 9,
+    "name": { "ar": "شنطة جلد طبيعي هيكلية", "en": "Structured Leather Satchel" },
+    "desc": { "ar": "شنطة جلد طبيعي بقصة هيكلية، للشغل أو المشاوير الرسمية.", "en": "Full-grain leather satchel with a structured silhouette, built for work or dressier days." },
+    "price": 3200,
+    "compareAt": null,
+    "colors": ["#8C6239", "#4A3324"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1473188588951-666fce8e7c68?w=900&q=80&auto=format&fit=crop",
+    "tag": null
+  },
+  {
+    "id": "p05",
+    "category": "leather",
+    "gifting": true,
+    "stock": 3,
+    "name": { "ar": "شنطة جلد يومية", "en": "Everyday Leather Tote" },
+    "desc": { "ar": "شنطة جلد طبيعي فسيحة بتصميم هادئ، تتسع لاحتياجات يومك بالكامل.", "en": "A roomy, quiet-toned leather tote built for the everyday carry." },
+    "price": 2600,
+    "compareAt": null,
+    "colors": ["#4A3324", "#2A2827"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?w=900&q=80&auto=format&fit=crop",
+    "tag": null
+  },
+  {
+    "id": "p06",
+    "category": "leather",
+    "gifting": true,
+    "stock": 15,
+    "name": { "ar": "ساعة يد بسير جلد", "en": "Leather-Strap Watch" },
+    "desc": { "ar": "ساعة يونيسكس بسير جلد طبيعي وميناء بسيط، قطعة تدوم لسنين.", "en": "A unisex watch with a genuine leather strap and a clean dial — built to last for years." },
+    "price": 4200,
+    "compareAt": null,
+    "colors": ["#8C6239", "#2A2827"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1758887952896-8491d393afe2?w=900&q=80&auto=format&fit=crop",
+    "tag": { "ar": "جديد", "en": "New" }
+  },
+  {
+    "id": "p07",
+    "category": "gift-boxes",
+    "gifting": true,
+    "stock": 30,
+    "name": { "ar": "علبة هدية أثر — كلاسيك", "en": "Athar Signature Gift Box — Classic" },
+    "desc": { "ar": "علبة هدية منسّقة بتغليف ذهبي فاخر، تحتوي على قطعة مختارة من التشكيلة.", "en": "A curated gift box with elevated gold-ribbon packaging, featuring one selected piece from the collection." },
+    "price": 950,
+    "compareAt": null,
+    "colors": ["#8C6239"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1641933002513-880c86d110e5?w=900&q=80&auto=format&fit=crop",
+    "tag": { "ar": "مثالي كهدية", "en": "Ideal for Gifting" }
+  },
+  {
+    "id": "p08",
+    "category": "gift-boxes",
+    "gifting": true,
+    "stock": 12,
+    "name": { "ar": "علبة هدية أثر — ديلوكس", "en": "Athar Signature Gift Box — Deluxe" },
+    "desc": { "ar": "مجموعة هدايا أكبر بتغليف فاخر، مناسبة للمناسبات الخاصة.", "en": "A larger gifting set with premium packaging, suited for special occasions." },
+    "price": 1450,
+    "compareAt": null,
+    "colors": ["#8C6239"],
+    "sizes": ["مقاس واحد"],
+    "image": "https://images.unsplash.com/photo-1641933002513-880c86d110e5?w=900&q=80&auto=format&fit=crop",
+    "tag": { "ar": "مثالي كهدية", "en": "Ideal for Gifting" }
+  }
+];
 
 </script>
 <script>
@@ -783,16 +898,29 @@ const I18N = {
     dir: "rtl",
     nav_home: "الرئيسية",
     nav_shop: "التشكيلات",
+    nav_jewelry: "مجوهرات",
+    nav_leather: "جلديات وساعات",
+    nav_giftboxes: "علب هدايا",
     nav_cart: "الحقيبة",
     lang_switch: "EN",
     hero_kicker: "كل قطعة تحكي حكاية",
     hero_title: "كل قطعة تحكي حكاية، وكل هدية تسيب أثر",
     hero_desc: "اكتشف مجوهرات وإكسسوارات فاخرة ومجموعات هدايا مميزة له ولها.",
     hero_cta: "اكتشف التشكيلة",
+    cat_jewelry: "مجوهرات",
+    cat_jewelry_desc: "فضة عيار 925 وستانلس ستيل — خواتم وسلاسل وأساور",
+    cat_leather: "جلديات وساعات",
+    cat_leather_desc: "شنط وساعات جلد مصنوعة بعناية",
+    cat_giftboxes: "علب هدايا فاخرة",
+    cat_giftboxes_desc: "مجموعات مُنسّقة بتغليف مميز",
     featured_title: "الأكثر طلبًا",
     featured_link: "عرض الكل",
     all_products: "كل التشكيلة",
     filter_all: "الكل",
+    filter_jewelry: "مجوهرات",
+    filter_leather: "جلديات وساعات",
+    filter_giftboxes: "علب هدايا",
+    gifting_badge: "مثالي كهدية",
     low_stock: "باقي {n} قطع فقط!",
     out_of_stock: "نفدت الكمية",
     add_to_cart: "أضف إلى الحقيبة",
@@ -855,16 +983,29 @@ const I18N = {
     dir: "ltr",
     nav_home: "Home",
     nav_shop: "Collections",
+    nav_jewelry: "Jewelry",
+    nav_leather: "Leather & Watches",
+    nav_giftboxes: "Gift Boxes",
     nav_cart: "Bag",
     lang_switch: "AR",
     hero_kicker: "Every piece tells a story",
     hero_title: "Every Piece Tells a Story. Every Gift Leaves a Mark.",
     hero_desc: "Discover high-quality accessories and luxury gifting sets for Him & Her.",
     hero_cta: "Discover the Collection",
+    cat_jewelry: "Silver & Jewelry",
+    cat_jewelry_desc: "925 silver & stainless steel — rings, chains, bracelets",
+    cat_leather: "Leather & Accessories",
+    cat_leather_desc: "Handcrafted leather bags and watches",
+    cat_giftboxes: "Luxury Gift Boxes",
+    cat_giftboxes_desc: "Curated sets with elevated packaging",
     featured_title: "Most wanted",
     featured_link: "View all",
     all_products: "The Collection",
     filter_all: "All",
+    filter_jewelry: "Jewelry",
+    filter_leather: "Leather & Watches",
+    filter_giftboxes: "Gift Boxes",
+    gifting_badge: "Ideal for Gifting",
     low_stock: "Only {n} left!",
     out_of_stock: "Out of Stock",
     add_to_cart: "Add to bag",
@@ -1054,7 +1195,9 @@ function showToast(msg) {
 
 /* ---------- product card markup ---------- */
 const CATEGORY_LABELS = {
-  "stainless-steel": { ar: "ستانلس ستيل", en: "Stainless Steel" },
+  jewelry: { ar: "مجوهرات", en: "Jewelry" },
+  leather: { ar: "جلديات وساعات", en: "Leather & Watches" },
+  "gift-boxes": { ar: "علب هدايا", en: "Gift Boxes" },
 };
 
 function stockBadgeHTML(p) {
