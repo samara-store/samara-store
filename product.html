@@ -717,6 +717,81 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: 1.5rem;
 }
 
+/* ============================================
+   Homepage collections grid (5 cards)
+   ============================================ */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+@media (max-width: 980px) { .collections-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 620px) { .collections-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.collection-card { display: block; cursor: pointer; }
+.collection-card.is-static { cursor: default; }
+.collection-media {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: var(--sand);
+  margin-bottom: 10px;
+}
+.collection-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+.collection-card:hover .collection-media img { transform: scale(1.04); }
+.collection-card.is-static .collection-media img { filter: grayscale(15%); opacity: 0.92; }
+
+.stay-tuned-badge {
+  position: absolute;
+  bottom: 0; inset-inline: 0;
+  padding: 14px 8px 12px;
+  background: linear-gradient(transparent, rgba(0,0,0,.72));
+  color: var(--white);
+  font-family: var(--font-nav);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.collection-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.empty-collection-msg {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   WhatsApp order confirmation notice
+   ============================================ */
+.whatsapp-confirm-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #E9FBEF;
+  border: 1px solid #25D366;
+  color: #128C42;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin: 14px 0;
+  text-align: center;
+  justify-content: center;
+}
+
+.hero-floating-cta {
+  padding: 22px 40px;
+  max-width: 320px;
+}
+
 </style>
 </head>
 <body>
@@ -730,9 +805,7 @@ textarea { resize: vertical; min-height: 80px; }
     <nav class="main-nav" id="mainNav">
       <a href="index.html" data-i18n="nav_home">الرئيسية</a>
       <a href="shop.html" data-i18n="nav_shop">التشكيلات</a>
-      <a href="shop.html?cat=jewelry" data-i18n="nav_jewelry">مجوهرات</a>
-      <a href="shop.html?cat=leather" data-i18n="nav_leather">جلديات وساعات</a>
-      <a href="shop.html?cat=gift-boxes" data-i18n="nav_giftboxes">علب هدايا</a>
+      <a href="shop.html?cat=steel" data-i18n="nav_steel">ستانلس ستيل</a>
     </nav>
     <div class="header-actions">
       <button class="lang-btn" id="langBtn">EN</button>
@@ -758,119 +831,27 @@ textarea { resize: vertical; min-height: 80px; }
 </footer>
 
 <script>
+/* ============================================
+   PRODUCT CATALOG
+   ============================================
+   Add real products here as they're ready.
+   Each product object needs:
+     id        — unique string, e.g. "s01", "s02"...
+     category  — must be "steel" (only active
+                 collection right now)
+     name      — { ar: "...", en: "..." }
+     desc      — { ar: "...", en: "..." }
+     price     — number (EGP)
+     compareAt — number or null (old price if on sale)
+     colors    — array of hex codes
+     sizes     — array of strings
+     stock     — number of pieces available
+     image     — path or URL to product photo
+     tag       — { ar: "...", en: "..." } or null
+     gifting   — true/false (shows "Ideal for Gifting")
+   ============================================ */
 const PRODUCTS = [
-  {
-    "id": "p01",
-    "category": "jewelry",
-    "gifting": true,
-    "stock": 24,
-    "name": { "ar": "خاتم فضة زوجي كلاسيك", "en": "Classic Silver Band Rings" },
-    "desc": { "ar": "خواتم فضة بتصميم بسيط ومصقول، مناسبة للاستخدام اليومي أو كهدية.", "en": "Polished silver bands with a minimal profile — everyday wear or a considered gift." },
-    "price": 650,
-    "compareAt": null,
-    "colors": ["#C7C9CC"],
-    "sizes": ["52", "54", "56", "58", "60"],
-    "image": "https://images.unsplash.com/photo-1578632297758-3a6c6de14be8?w=900&q=80&auto=format&fit=crop",
-    "tag": null
-  },
-  {
-    "id": "p02",
-    "category": "jewelry",
-    "gifting": true,
-    "stock": 4,
-    "name": { "ar": "خاتم فضة استيتمنت", "en": "Statement Silver Ring" },
-    "desc": { "ar": "خاتم فضة بتفاصيل لامعة وتصميم مميز يلفت الانتباه بدون مبالغة.", "en": "A brighter, more sculptural silver ring — a quiet statement piece without being loud." },
-    "price": 780,
-    "compareAt": null,
-    "colors": ["#D8D9DB"],
-    "sizes": ["52", "54", "56", "58", "60"],
-    "image": "https://images.unsplash.com/photo-1589426056403-25c5faaac8ea?w=900&q=80&auto=format&fit=crop",
-    "tag": { "ar": "جديد", "en": "New" }
-  },
-  {
-    "id": "p03",
-    "category": "jewelry",
-    "gifting": true,
-    "stock": 0,
-    "name": { "ar": "سلسلة فضة", "en": "Silver Chain Necklace" },
-    "desc": { "ar": "سلسلة فضة يونيسكس بتصميم بسيط، تتنسق مع أي إطلالة.", "en": "A unisex silver chain with a clean, minimal build that layers with anything." },
-    "price": 920,
-    "compareAt": 1050,
-    "colors": ["#C7C9CC"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1612011213611-ff46ab689475?w=900&q=80&auto=format&fit=crop",
-    "tag": { "ar": "خصم", "en": "Sale" }
-  },
-  {
-    "id": "p04",
-    "category": "leather",
-    "gifting": true,
-    "stock": 9,
-    "name": { "ar": "شنطة جلد طبيعي هيكلية", "en": "Structured Leather Satchel" },
-    "desc": { "ar": "شنطة جلد طبيعي بقصة هيكلية، للشغل أو المشاوير الرسمية.", "en": "Full-grain leather satchel with a structured silhouette, built for work or dressier days." },
-    "price": 3200,
-    "compareAt": null,
-    "colors": ["#8C6239", "#4A3324"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1473188588951-666fce8e7c68?w=900&q=80&auto=format&fit=crop",
-    "tag": null
-  },
-  {
-    "id": "p05",
-    "category": "leather",
-    "gifting": true,
-    "stock": 3,
-    "name": { "ar": "شنطة جلد يومية", "en": "Everyday Leather Tote" },
-    "desc": { "ar": "شنطة جلد طبيعي فسيحة بتصميم هادئ، تتسع لاحتياجات يومك بالكامل.", "en": "A roomy, quiet-toned leather tote built for the everyday carry." },
-    "price": 2600,
-    "compareAt": null,
-    "colors": ["#4A3324", "#2A2827"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?w=900&q=80&auto=format&fit=crop",
-    "tag": null
-  },
-  {
-    "id": "p06",
-    "category": "leather",
-    "gifting": true,
-    "stock": 15,
-    "name": { "ar": "ساعة يد بسير جلد", "en": "Leather-Strap Watch" },
-    "desc": { "ar": "ساعة يونيسكس بسير جلد طبيعي وميناء بسيط، قطعة تدوم لسنين.", "en": "A unisex watch with a genuine leather strap and a clean dial — built to last for years." },
-    "price": 4200,
-    "compareAt": null,
-    "colors": ["#8C6239", "#2A2827"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1758887952896-8491d393afe2?w=900&q=80&auto=format&fit=crop",
-    "tag": { "ar": "جديد", "en": "New" }
-  },
-  {
-    "id": "p07",
-    "category": "gift-boxes",
-    "gifting": true,
-    "stock": 30,
-    "name": { "ar": "علبة هدية أثر — كلاسيك", "en": "Athar Signature Gift Box — Classic" },
-    "desc": { "ar": "علبة هدية منسّقة بتغليف ذهبي فاخر، تحتوي على قطعة مختارة من التشكيلة.", "en": "A curated gift box with elevated gold-ribbon packaging, featuring one selected piece from the collection." },
-    "price": 950,
-    "compareAt": null,
-    "colors": ["#8C6239"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1641933002513-880c86d110e5?w=900&q=80&auto=format&fit=crop",
-    "tag": { "ar": "مثالي كهدية", "en": "Ideal for Gifting" }
-  },
-  {
-    "id": "p08",
-    "category": "gift-boxes",
-    "gifting": true,
-    "stock": 12,
-    "name": { "ar": "علبة هدية أثر — ديلوكس", "en": "Athar Signature Gift Box — Deluxe" },
-    "desc": { "ar": "مجموعة هدايا أكبر بتغليف فاخر، مناسبة للمناسبات الخاصة.", "en": "A larger gifting set with premium packaging, suited for special occasions." },
-    "price": 1450,
-    "compareAt": null,
-    "colors": ["#8C6239"],
-    "sizes": ["مقاس واحد"],
-    "image": "https://images.unsplash.com/photo-1641933002513-880c86d110e5?w=900&q=80&auto=format&fit=crop",
-    "tag": { "ar": "مثالي كهدية", "en": "Ideal for Gifting" }
-  }
+  // (empty for now — ready to receive Stainless Steel products)
 ];
 
 </script>
@@ -898,9 +879,7 @@ const I18N = {
     dir: "rtl",
     nav_home: "الرئيسية",
     nav_shop: "التشكيلات",
-    nav_jewelry: "مجوهرات",
-    nav_leather: "جلديات وساعات",
-    nav_giftboxes: "علب هدايا",
+    nav_steel: "ستانلس ستيل",
     nav_cart: "الحقيبة",
     lang_switch: "EN",
     hero_kicker: "كل قطعة تحكي حكاية",
@@ -917,9 +896,14 @@ const I18N = {
     featured_link: "عرض الكل",
     all_products: "كل التشكيلة",
     filter_all: "الكل",
-    filter_jewelry: "مجوهرات",
-    filter_leather: "جلديات وساعات",
-    filter_giftboxes: "علب هدايا",
+    filter_steel: "ستانلس ستيل",
+    filter_silver: "فضة",
+    filter_bags: "شنط",
+    filter_wallets: "محافظ",
+    filter_watches: "ساعات",
+    stay_tuned: "ترقبوا تشكيلتنا قريبًا",
+    empty_collection: "لسه مفيش منتجات في القسم ده، تابعونا قريبًا.",
+    whatsapp_confirm_note: "اضغط على أيقونة الواتساب لتأكيد طلبك",
     gifting_badge: "مثالي كهدية",
     low_stock: "باقي {n} قطع فقط!",
     out_of_stock: "نفدت الكمية",
@@ -983,9 +967,7 @@ const I18N = {
     dir: "ltr",
     nav_home: "Home",
     nav_shop: "Collections",
-    nav_jewelry: "Jewelry",
-    nav_leather: "Leather & Watches",
-    nav_giftboxes: "Gift Boxes",
+    nav_steel: "Stainless Steel",
     nav_cart: "Bag",
     lang_switch: "AR",
     hero_kicker: "Every piece tells a story",
@@ -1002,9 +984,14 @@ const I18N = {
     featured_link: "View all",
     all_products: "The Collection",
     filter_all: "All",
-    filter_jewelry: "Jewelry",
-    filter_leather: "Leather & Watches",
-    filter_giftboxes: "Gift Boxes",
+    filter_steel: "Stainless Steel",
+    filter_silver: "Silver",
+    filter_bags: "Bags",
+    filter_wallets: "Wallets",
+    filter_watches: "Watches",
+    stay_tuned: "Stay tuned for our collection",
+    empty_collection: "No products here yet — stay tuned.",
+    whatsapp_confirm_note: "Press on the WhatsApp icon to confirm your order",
     gifting_badge: "Ideal for Gifting",
     low_stock: "Only {n} left!",
     out_of_stock: "Out of Stock",
@@ -1193,11 +1180,28 @@ function showToast(msg) {
   window._toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
 }
 
+/* ============================================
+   COLLECTIONS CONFIG
+   ============================================
+   The 5 homepage collections. Only "active"
+   collections link to a real shop page — the
+   rest show a cover image + "Stay Tuned".
+   ============================================ */
+const COLLECTIONS = [
+  { id: "steel",    name: { ar: "ستانلس ستيل", en: "Stainless Steel" },   image: "collection-steel.jpg",    active: true  },
+  { id: "silver",   name: { ar: "فضة",         en: "Silver" },           image: "collection-silver.jpg",   active: false },
+  { id: "bags",     name: { ar: "شنط",         en: "Bags" },             image: "collection-bags.jpg",     active: false },
+  { id: "wallets",  name: { ar: "محافظ",       en: "Wallets" },          image: "collection-wallets.jpg",  active: false },
+  { id: "watches",  name: { ar: "ساعات",       en: "Watches" },          image: "collection-watches.jpg",  active: false },
+];
+
 /* ---------- product card markup ---------- */
 const CATEGORY_LABELS = {
-  jewelry: { ar: "مجوهرات", en: "Jewelry" },
-  leather: { ar: "جلديات وساعات", en: "Leather & Watches" },
-  "gift-boxes": { ar: "علب هدايا", en: "Gift Boxes" },
+  steel:   { ar: "ستانلس ستيل", en: "Stainless Steel" },
+  silver:  { ar: "فضة",         en: "Silver" },
+  bags:    { ar: "شنط",         en: "Bags" },
+  wallets: { ar: "محافظ",       en: "Wallets" },
+  watches: { ar: "ساعات",       en: "Watches" },
 };
 
 function stockBadgeHTML(p) {
@@ -1205,6 +1209,21 @@ function stockBadgeHTML(p) {
   if (p.stock === 0) return `<span class="stock-badge out">${t("out_of_stock")}</span>`;
   if (p.stock <= LOW_STOCK_THRESHOLD) return `<span class="stock-badge low">${t("low_stock").replace("{n}", p.stock)}</span>`;
   return "";
+}
+
+function collectionCardHTML(c) {
+  const name = c.name[getLang()];
+  const inner = `
+    <div class="collection-media">
+      <img src="${c.image}" alt="${name}" loading="lazy">
+      ${c.active ? "" : `<div class="stay-tuned-badge">${t("stay_tuned")}</div>`}
+    </div>
+    <div class="collection-label">${name}</div>
+  `;
+  if (c.active) {
+    return `<a class="collection-card" href="shop.html?cat=${c.id}">${inner}</a>`;
+  }
+  return `<div class="collection-card is-static">${inner}</div>`;
 }
 
 function productCardHTML(p) {
@@ -1295,6 +1314,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+
 <script>
   const productId = new URLSearchParams(location.search).get("id");
   const product = findProduct(productId) || PRODUCTS[0];
