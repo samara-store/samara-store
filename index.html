@@ -190,25 +190,30 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
    a centered floating headline box
    ============================================ */
 .hero {
-  position: relative;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  align-items: stretch;
+  background: var(--bg);
+  width: calc(100% - 24px);
+  max-width: var(--maxw);
+  margin: 18px auto 0;
+  box-shadow: 0 16px 36px rgba(42,40,39,.12);
 }
 .hero-media {
   width: 100%;
-  aspect-ratio: 16/8;
+  aspect-ratio: auto;
   overflow: hidden;
   background: var(--sand);
 }
 .hero-media img { width: 100%; height: 100%; object-fit: cover; }
 
-.hero-floating {
-  position: relative;
-  margin: -70px auto 0;
-  max-width: 780px;
-  background: rgba(255,255,255,0.96);
-  padding: 44px 48px;
-  text-align: center;
-  box-shadow: 0 20px 50px rgba(42,40,39,.12);
+.hero-copy {
+  padding: 56px 56px 56px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
+[dir="rtl"] .hero-copy { padding: 56px 24px 56px 56px; }
 
 .hero-kicker {
   color: var(--accent);
@@ -225,16 +230,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font-weight: 700;
   line-height: 1.3;
   margin: 0 0 16px;
+  max-width: 15ch;
 }
 .hero-desc {
   font-size: 1rem;
   color: var(--ink-soft);
   margin: 0 0 26px;
+  max-width: 40ch;
 }
 
 @media (max-width: 780px) {
-  .hero-media { aspect-ratio: 3/4; }
-  .hero-floating { margin-top: -50px; padding: 32px 24px; width: calc(100% - 32px); }
+  .hero { grid-template-columns: 1fr; }
+  .hero-media { aspect-ratio: 4/5; order: 1; }
+  .hero-copy { padding: 32px 24px !important; order: 2; text-align: center; align-items: center; }
+  .hero-title, .hero-desc { max-width: 100%; }
 }
 
 /* ============================================
@@ -787,10 +796,70 @@ textarea { resize: vertical; min-height: 80px; }
   justify-content: center;
 }
 
-.hero-floating-cta {
-  padding: 22px 40px;
-  max-width: 320px;
+
+/* ============================================
+   Product image gallery (swipeable)
+   ============================================ */
+.pd-gallery {
+  position: relative;
+  background: var(--sand);
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  direction: ltr; /* keep swipe math consistent regardless of page language */
 }
+.pd-gallery-track {
+  display: flex;
+  height: 100%;
+  transition: transform .32s ease;
+  touch-action: pan-y;
+}
+.pd-gallery-track img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex: 0 0 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.pd-gallery-dots {
+  position: absolute;
+  bottom: 14px;
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  z-index: 3;
+}
+.pd-gallery-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.6);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.pd-gallery-dot.active { background: var(--white); width: 18px; border-radius: 4px; }
+.pd-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.88);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  color: var(--ink);
+}
+.pd-gallery-arrow.prev { left: 10px; }
+.pd-gallery-arrow.next { right: 10px; }
 
 </style>
 </head>
@@ -822,7 +891,10 @@ textarea { resize: vertical; min-height: 80px; }
   <div class="hero-media">
     <img src="hero.jpg" alt="SAMARA">
   </div>
-  <div class="hero-floating hero-floating-cta">
+  <div class="hero-copy">
+    <div class="hero-kicker" data-i18n="hero_kicker">كل قطعة تحكي حكاية</div>
+    <h1 class="hero-title" data-i18n="hero_title">كل قطعة تحكي حكاية، وكل هدية تسيب أثر</h1>
+    <p class="hero-desc" data-i18n="hero_desc">اكتشف مجوهرات وإكسسوارات فاخرة ومجموعات هدايا مميزة له ولها.</p>
     <a href="shop.html" class="btn" data-i18n="hero_cta">اكتشف التشكيلة</a>
   </div>
 </section>
@@ -882,15 +954,341 @@ textarea { resize: vertical; min-height: 80px; }
      desc      — { ar: "...", en: "..." }
      price     — number (EGP)
      compareAt — number or null (old price if on sale)
-     colors    — array of hex codes
+     colors    — array of hex codes, or [] if the
+                 product has no color options
      sizes     — array of strings
-     stock     — number of pieces available
-     image     — path or URL to product photo
+     stock     — number of pieces available, or
+                 null if not tracked
+     images    — array of 1-3 photo paths/URLs.
+                 First image is used as the card
+                 thumbnail; all of them show as a
+                 swipeable gallery on the product page.
      tag       — { ar: "...", en: "..." } or null
      gifting   — true/false (shows "Ideal for Gifting")
    ============================================ */
 const PRODUCTS = [
-  // (empty for now — ready to receive Stainless Steel products)
+  {
+    "id": "1",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "BLUE AURA STAINLESS STEEL NECKLACE", "en": "BLUE AURA STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 270,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["1-1.jpg", "1-2.jpg", "1-3.jpg"],
+    "tag": null
+  },
+  {
+    "id": "2",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "NOIR MESH STAINLESS STEEL BRACELET", "en": "NOIR MESH STAINLESS STEEL BRACELET" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["2-1.jpg", "2-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "3",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "BLANC MESH STAINLESS STEEL BRACELET", "en": "BLANC MESH STAINLESS STEEL BRACELET" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["3-1.jpg", "3-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "4",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "GALAXY CHAIN STAINLESS STEEL BRACELET", "en": "GALAXY CHAIN STAINLESS STEEL BRACELET" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["4-1.jpg", "4-2.jpg", "4-3.jpg", "4-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "5",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "ROYAL ROSE STAINLESS STEEL NECKLACE", "en": "ROYAL ROSE STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 285,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["5-1.jpg", "5-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "6",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "VIOLET BLOSSOM STAINLESS STEEL NECKLESS", "en": "VIOLET BLOSSOM STAINLESS STEEL NECKLESS" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 285,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["6-1.jpg", "6-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "7",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "NOIR WAVE STAINLESS STEEL RING", "en": "NOIR WAVE STAINLESS STEEL RING" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 215,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["Adjustable Ring"],
+    "stock": null,
+    "images": ["7-1.jpg", "7-2.jpg", "7-3.jpg"],
+    "tag": null
+  },
+  {
+    "id": "12",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "SPARKLE STAINLESS STEEL NECKLACE", "en": "SPARKLE STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 275,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["12-1.jpg", "12-2.jpg", "12-3.jpg", "12-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "13",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "SUN STAINLESS STEEL NECKLACE", "en": "SUN STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 275,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["13-1.jpg", "13-2.jpg", "13-3.jpg", "13-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "14",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "BIRDIE STAINLESS STEEL NECKLACE", "en": "BIRDIE STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["14-1.jpg", "14-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "15",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "DUE SNAKE STAINLESS STEEL NECKLACE", "en": "DUE SNAKE STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 350,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["15-1.jpg", "15-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "16",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "KNOT STAINLESS STEEL BRACELET", "en": "KNOT STAINLESS STEEL BRACELET" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 270,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["16-1.jpg", "16-2.jpg", "16-3.jpg", "16-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "17",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "PRISM GEM GOLD PLATED NECKLACE", "en": "PRISM GEM GOLD PLATED NECKLACE" },
+    "desc": { "ar": "سلسلة أنيقة من الستانلس ستيل 316 مع دلاية مطلية بالذهب، تضيف لمسة راقية وفخمة لأي إطلالة.", "en": "Elegant 316 stainless steel chain with a refined gold-plated pendant, perfect for adding a subtle touch of luxury to any look." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["17-1.jpg", "17-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "18",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "WHITE GEM GOLD PLATED NECKLACE", "en": "WHITE GEM GOLD PLATED NECKLACE" },
+    "desc": { "ar": "سلسلة أنيقة من الستانلس ستيل 316 مع دلاية مطلية بالذهب، تضيف لمسة راقية وفخمة لأي إطلالة.", "en": "Elegant 316 stainless steel chain with a refined gold-plated pendant, perfect for adding a subtle touch of luxury to any look." },
+    "price": 295,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["18-1.jpg", "18-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "19",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "NORTH STAR STAINLESS STEEL NECKLACE", "en": "NORTH STAR STAINLESS STEEL NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 310,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["19-1.jpg", "19-2.jpg", "19-3.jpg"],
+    "tag": null
+  },
+  {
+    "id": "20",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "ENTA OMRI SILVER AND GOLD PLATED RING", "en": "ENTA OMRI SILVER AND GOLD PLATED RING" },
+    "desc": { "ar": "قطعة أنيقة مطلية بالذهب بلمسة راقية، تضيف لمسة من الفخامة لأي إطلالة.", "en": "Elegant gold-plated piece with a refined finish, perfect for adding a touch of luxury to any look." },
+    "price": 345,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["Adjustable Ring"],
+    "stock": null,
+    "images": ["20-1.jpg"],
+    "tag": null
+  },
+  {
+    "id": "21",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "OVAL SOLITAIRE GOLD PLATED RING", "en": "OVAL SOLITAIRE GOLD PLATED RING" },
+    "desc": { "ar": "قطعة أنيقة مطلية بالذهب بلمسة راقية، تضيف لمسة من الفخامة لأي إطلالة.", "en": "Elegant gold-plated piece with a refined finish, perfect for adding a touch of luxury to any look." },
+    "price": 325,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["Adjustable Ring"],
+    "stock": null,
+    "images": ["21-1.jpg", "21-2.jpg", "21-3.jpg", "21-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "22",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "ROYAL SOLITAIRE GOLD PLATED RING", "en": "ROYAL SOLITAIRE GOLD PLATED RING" },
+    "desc": { "ar": "قطعة أنيقة مطلية بالذهب بلمسة راقية، تضيف لمسة من الفخامة لأي إطلالة.", "en": "Elegant gold-plated piece with a refined finish, perfect for adding a touch of luxury to any look." },
+    "price": 325,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["Adjustable Ring"],
+    "stock": null,
+    "images": ["22-1.jpg", "22-2.jpg", "22-3.jpg", "22-4.jpg"],
+    "tag": null
+  },
+  {
+    "id": "23",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "DUAL SQUARE RING", "en": "DUAL SQUARE RING" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 270,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["Adjustable Ring"],
+    "stock": null,
+    "images": ["23-1.jpg"],
+    "tag": null
+  },
+  {
+    "id": "24",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "PETIT HEART NECKLACE", "en": "PETIT HEART NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 275,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["24-1.jpg", "24-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "25",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "WHITE HEART NECKLACE", "en": "WHITE HEART NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 275,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["25-1.jpg", "25-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "26",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "GOLDEN HALO NECKLACE", "en": "GOLDEN HALO NECKLACE" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 280,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["26-1.jpg", "26-2.jpg"],
+    "tag": null
+  },
+  {
+    "id": "27",
+    "category": "steel",
+    "gifting": true,
+    "name": { "ar": "GOLDEN BAMBOO BRACELET", "en": "GOLDEN BAMBOO BRACELET" },
+    "desc": { "ar": "قطعة أنيقة من الستانلس ستيل 316 بتصميم مميز، مثالية لإطلالتك اليومية.", "en": "Elegant 316 stainless steel piece with a timeless design, perfect for everyday styling." },
+    "price": 260,
+    "compareAt": null,
+    "colors": [],
+    "sizes": ["مقاس واحد"],
+    "stock": null,
+    "images": ["27-1.jpg", "27-2.jpg"],
+    "tag": null
+  },
 ];
 
 </script>
@@ -1278,7 +1676,7 @@ function productCardHTML(p) {
       <div class="product-media">
         ${tagHTML}
         ${stockBadgeHTML(p)}
-        <img src="${p.image}" alt="${pName(p)}" loading="lazy">
+        <img src="${p.images[0]}" alt="${pName(p)}" loading="lazy">
       </div>
       <div class="product-cat">${catLabel}</div>
       <h3 class="product-name">${pName(p)}</h3>
@@ -1353,6 +1751,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+
 
 <script>
   function renderCollections() {
