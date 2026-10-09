@@ -1298,7 +1298,7 @@ const I18N = {
     filter_watches: "ساعات",
     stay_tuned: "ترقبوا تشكيلتنا قريبًا",
     empty_collection: "لسه مفيش منتجات في القسم ده، تابعونا قريبًا.",
-    whatsapp_confirm_note: "اضغط على أيقونة الواتساب لتأكيد طلبك",
+    whatsapp_confirm_note: "لتأكيد طلبك، يرجى الضغط هنا 👇",
     gifting_badge: "مثالي كهدية",
     low_stock: "باقي {n} قطع فقط!",
     out_of_stock: "نفدت الكمية",
@@ -1386,7 +1386,7 @@ const I18N = {
     filter_watches: "Watches",
     stay_tuned: "Stay tuned for our collection",
     empty_collection: "No products here yet — stay tuned.",
-    whatsapp_confirm_note: "Press on the WhatsApp icon to confirm your order",
+    whatsapp_confirm_note: "To confirm your order, press here 👇",
     gifting_badge: "Ideal for Gifting",
     low_stock: "Only {n} left!",
     out_of_stock: "Out of Stock",
@@ -1872,9 +1872,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <h2>${t("order_success_title")}</h2>
         <p>${t("order_success_desc")}</p>
         <p>${t("order_success_num")}: <span class="num">${orderNum}</span></p>
-        <div class="whatsapp-confirm-note">⚠️ ${t("whatsapp_confirm_note")}</div>
-        <br>
-        <a href="${waUrl}" target="_blank" rel="noopener" class="btn" style="background:#25D366;border-color:#25D366;">${t("whatsapp_cta")}</a>
+        <div class="whatsapp-confirm-note" style="margin-bottom:4px;border-bottom-left-radius:0;border-bottom-right-radius:0;">${t("whatsapp_confirm_note")}</div>
+        <a href="${waUrl}" target="_blank" rel="noopener" class="btn" style="background:#25D366;border-color:#25D366;width:100%;justify-content:center;border-top-left-radius:0;border-top-right-radius:0;">${t("whatsapp_cta")}</a>
         <br><br>
         <a href="index.html" class="btn btn-outline">${t("back_home")}</a>
       </div>
@@ -1883,6 +1882,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.dir = I18N[getLang()].dir;
     const langBtn = document.getElementById("langBtn");
     if (langBtn) langBtn.textContent = I18N[getLang()].lang_switch;
+    const floatBtn = document.querySelector(".whatsapp-float");
+    if (floatBtn) floatBtn.style.display = "none";
   }
 
   function onLangChange() { if (!orderPlaced) renderCheckout(); }

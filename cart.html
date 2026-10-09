@@ -1298,7 +1298,7 @@ const I18N = {
     filter_watches: "ساعات",
     stay_tuned: "ترقبوا تشكيلتنا قريبًا",
     empty_collection: "لسه مفيش منتجات في القسم ده، تابعونا قريبًا.",
-    whatsapp_confirm_note: "اضغط على أيقونة الواتساب لتأكيد طلبك",
+    whatsapp_confirm_note: "لتأكيد طلبك، يرجى الضغط هنا 👇",
     gifting_badge: "مثالي كهدية",
     low_stock: "باقي {n} قطع فقط!",
     out_of_stock: "نفدت الكمية",
@@ -1386,7 +1386,7 @@ const I18N = {
     filter_watches: "Watches",
     stay_tuned: "Stay tuned for our collection",
     empty_collection: "No products here yet — stay tuned.",
-    whatsapp_confirm_note: "Press on the WhatsApp icon to confirm your order",
+    whatsapp_confirm_note: "To confirm your order, press here 👇",
     gifting_badge: "Ideal for Gifting",
     low_stock: "Only {n} left!",
     out_of_stock: "Out of Stock",
@@ -1763,8 +1763,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="summary-row"><span data-i18n="subtotal">المجموع الفرعي</span><span>${money(subtotal)}</span></div>
           <div class="summary-row"><span data-i18n="shipping">الشحن</span><span>${money(SHIPPING_FEE)}</span></div>
           <div class="summary-row total"><span data-i18n="total">الإجمالي</span><span>${money(subtotal + SHIPPING_FEE)}</span></div>
-          <div class="whatsapp-confirm-note" style="font-size:0.78rem;padding:9px 10px;">${t("whatsapp_confirm_note")}</div>
-          <a href="checkout.html" class="btn btn-block" style="margin-top:10px;" data-i18n="checkout_cta">إتمام الطلب</a>
+          <a href="checkout.html" class="btn btn-block" style="margin-top:18px;" data-i18n="checkout_cta">إتمام الطلب</a>
           <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px;" data-i18n="continue_shopping">متابعة التسوق</a>
         </div>
       </div>
