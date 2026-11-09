@@ -870,7 +870,7 @@ if (META_PIXEL_ID) {
   fbq('init', META_PIXEL_ID);
   fbq('track', 'PageView');
 }
-function trackPixel(event, data) { try { if (window.fbq) fbq('track', event, data); } catch (e) {} }
+function trackPixel(event, data, opts) { try { if (window.fbq) { if (opts) fbq('track', event, data, opts); else fbq('track', event, data); } } catch (e) {} }
 </script>
 <!-- End Meta Pixel -->
 </head>
@@ -1813,16 +1813,22 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     applyLang(false);
 
+    let orderSubmitting = false;
     document.getElementById("checkoutForm").addEventListener("submit", (e) => {
       e.preventDefault();
+      if (orderSubmitting) return;
+      orderSubmitting = true;
       const orderNum = "ATH-" + Math.floor(100000 + Math.random() * 900000);
       const customer = Object.fromEntries(new FormData(e.target));
       const waUrl = buildWhatsAppUrl(orderNum, customer);
       const purchaseItems = getCart();
-      trackPixel('Purchase', { content_ids: purchaseItems.map((i) => i.id), content_type: 'product', num_items: cartCount(), value: cartSubtotal() + SHIPPING_FEE, currency: 'EGP' });
-      localStorage.removeItem("athar_cart");
-      updateCartCount();
-      showSuccess(orderNum, waUrl);
+      trackPixel('Purchase', { content_ids: purchaseItems.map((i) => i.id), content_type: 'product', num_items: cartCount(), value: cartSubtotal() + SHIPPING_FEE, currency: 'EGP' }, { eventID: orderNum });
+      // نستنى نص ثانية تقريباً عشان المتصفح يلحق يبعت حدث الشراء قبل ما الصفحة تتغير
+      setTimeout(() => {
+        localStorage.removeItem("athar_cart");
+        updateCartCount();
+        showSuccess(orderNum, waUrl);
+      }, 600);
     });
   }
 
