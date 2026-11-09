@@ -1824,13 +1824,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const purchaseItems = getCart();
       trackPixel('Purchase', { content_ids: purchaseItems.map((i) => i.id), content_type: 'product', num_items: cartCount(), value: cartSubtotal() + SHIPPING_FEE, currency: 'EGP' }, { eventID: orderNum });
       // نستنى نص ثانية تقريباً عشان المتصفح يلحق يبعت حدث الشراء قبل ما الصفحة تتغير
-      // [تجربة مؤقتة] شريط بيوضح إن كود Purchase اشتغل - هيتشال بعد الاختبار
-      try {
-        const dbg = document.createElement("div");
-        dbg.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#111;color:#fff;padding:10px;text-align:center;font-size:15px;direction:rtl";
-        dbg.textContent = "[تجربة v3] Purchase اتبعت | القيمة: " + (cartSubtotal() + SHIPPING_FEE) + " EGP | fbq: " + (typeof window.fbq) + " | رقم الطلب: " + orderNum;
-        document.body.appendChild(dbg);
-      } catch (err) {}
       setTimeout(() => {
         localStorage.removeItem("athar_cart");
         updateCartCount();
