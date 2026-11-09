@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختبار البيكسل</title>
+<script>
+const META_PIXEL_ID = "1430551858559328";
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', META_PIXEL_ID);
+fbq('track', 'PageView');
+</script>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;max-width:480px;margin:30px auto;padding:0 16px;line-height:1.8}
+button{display:block;width:100%;padding:16px;margin:12px 0;font-size:18px;border:0;border-radius:10px;background:#1b6ef3;color:#fff}
+#log{background:#f2f2f2;border-radius:8px;padding:10px;font-size:15px;min-height:60px}
+</style>
+</head>
+<body>
+<h2>صفحة اختبار البيكسل</h2>
+<p>افتحها من زرار Test Events في ميتا، واضغط الأزرار، وشوف إيه اللي بيظهر في Test events.</p>
+<button onclick="send('AddToCart',{value:100,currency:'EGP',content_ids:['t1'],content_type:'product'})">إرسال AddToCart (تجربة)</button>
+<button onclick="send('Purchase',{value:285,currency:'EGP',content_ids:['t1'],content_type:'product',num_items:1})">إرسال Purchase (تجربة)</button>
+<div id="log">لسه ما اتبعتش حاجة.</div>
+<script>
+function send(name, data){
+  var t = new Date().toLocaleTimeString();
+  try { fbq('track', name, data); document.getElementById('log').innerHTML += '<br>' + t + ' — اتبعت ' + name; }
+  catch(e){ document.getElementById('log').innerHTML += '<br>' + t + ' — خطأ: ' + e.message; }
+}
+</script>
+</body>
+</html>
